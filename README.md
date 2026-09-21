@@ -29,11 +29,20 @@
 This build adds company-scoped authentication, server-side authorization, employee master data, organization/position/vacancy flows, dynamic transaction definitions and workflows, payroll generation/approval/lock/export, reports, users/roles, notifications and audit APIs. The schema manager is additive and does not drop existing tables or data. Default bootstrap: company `GLOBAL`, user `admin`, password `1234`; change the password/disable bootstrap before production.
 
 
-## 2026-09 Performance / Transaction UX hardening
-- Worker schema bootstrap is cached per Worker isolate instead of running PRAGMA/index/seed work on every request.
-- Transaction definitions support company + department grouping, dynamic fields, role-based workflow steps and optional conditions.
-- Transaction list is paginated/limited and searchable server-side.
-- Transaction detail includes values, workflow and history.
-- Organization view renders a hierarchical visual tree from department parent relationships.
-- Frontend GET requests use short-lived cache/in-flight de-duplication; navigation no longer refetches identical data repeatedly.
-- Added migration 0003 for transaction administration indexes/department linkage.
+## Enterprise rebuild — Performance / Organization / Transactions v3
+
+This release is designed for the existing Cloudflare D1 database `hr-core`.
+
+### Important
+- The Worker no longer runs schema/seed checks on every request. Schema initialization is cached per Worker isolate.
+- A new `departments.unit_type` field is supported for sector/department/section/unit/branch classification.
+- Organization UI now renders a hierarchical tree with parent/child connectors and creates units using a parent selector instead of raw IDs.
+- Transaction list uses server-side search, status filtering and limited result sets.
+- Transaction details show workflow, values and history.
+- Transaction builder supports company, dynamic fields and role-based workflow steps.
+- Roles/permissions are shown as an enterprise matrix.
+- User creation hashes passwords with PBKDF2 instead of storing a fallback password.
+- Existing D1 data is preserved. Do not drop tables or reset the database.
+
+### Deployment
+Push the repository contents to the connected GitHub repository. Cloudflare should build/deploy the Worker from that commit. After deployment, open `/api/health` and confirm `ok: true` and schema version `3` (the first request may perform the one-time schema upgrade).
