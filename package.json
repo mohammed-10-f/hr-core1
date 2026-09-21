@@ -1,0 +1,10 @@
+{
+  "name": "hr-core-enterprise",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HR Core Enterprise — Arabic institutional HR system on Cloudflare Workers + D1",
+  "scripts": {
+    "build": "mkdir -p dist && cp -r public/* dist/"
+  },
+  "type": "module"
+}
