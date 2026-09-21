@@ -11,7 +11,7 @@ export async function verifyPassword(password,stored){
   const parts=stored.split('$');
   if(parts[0]==='pbkdf2' && parts.length===4){
     const got=await pbkdf2(password,parts[2],Number(parts[1]));
-    return got===parts[3];
+    return got===parts[3] || got.replaceAll('-','+').replaceAll('_','/')===parts[3].replaceAll('-','+').replaceAll('_','/');
   }
   const data=await crypto.subtle.digest('SHA-256',enc.encode(password));
   return b64u(data)===stored;

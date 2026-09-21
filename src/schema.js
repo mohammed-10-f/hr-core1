@@ -131,7 +131,7 @@ async function seed(db){
   const admin=await db.prepare(`SELECT id FROM roles WHERE code='super_admin'`).first();
   const perms=await db.prepare(`SELECT id FROM permissions WHERE active=1`).all();
   for(const p of (perms.results||[])) await db.prepare(`INSERT OR IGNORE INTO role_permissions(role_id,permission_id) VALUES(?,?)`).bind(admin.id,p.id).run();
-  const defaultPass='pbkdf2$100000$YWRtaW4tc2FsdC0yMDI2$38FPEssFOEsudeS7rQL4gfovCum/Qzrhf7H6WKLwCe0=';
+  const defaultPass='pbkdf2$100000$YWRtaW4tc2FsdC0yMDI2$38FPEssFOEsudeS7rQL4gfovCum_Qzrhf7H6WKLwCe0';
   // The seed hash is replaced at first bootstrap if absent; password verification also accepts SHA-256 legacy only for this seed account.
   await db.prepare(`INSERT OR IGNORE INTO users(id,username,password_hash,display_name,role_id,company_id,active,must_change_password) VALUES(1,'admin',?,'مدير النظام',?,1,1,1)`).bind(defaultPass,admin.id).run();
   const components=[['basic','الراتب الأساسي','earning'],['housing','بدل السكن','earning'],['transport','بدل النقل','earning'],['other','بدلات أخرى','earning'],['gosi','التأمينات الاجتماعية','deduction']];
