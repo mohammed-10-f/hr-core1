@@ -1,3 +1,1 @@
--- HR Core Enterprise canonical D1 schema.
--- The Worker Schema Manager is the source of runtime reconciliation.
--- This migration is intended for a completely new hr-core database.
+-- Canonical baseline is maintained by src/schema.js for additive compatibility.

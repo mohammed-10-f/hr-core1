@@ -23,3 +23,7 @@
 4. افتح الرابط وسجل الدخول.
 
 لا تشغّل Schema قديم من المشاريع السابقة على قاعدة البيانات الجديدة.
+
+
+## HR Core Enterprise — Enterprise hardening
+This build adds company-scoped authentication, server-side authorization, employee master data, organization/position/vacancy flows, dynamic transaction definitions and workflows, payroll generation/approval/lock/export, reports, users/roles, notifications and audit APIs. The schema manager is additive and does not drop existing tables or data. Default bootstrap: company `GLOBAL`, user `admin`, password `1234`; change the password/disable bootstrap before production.
