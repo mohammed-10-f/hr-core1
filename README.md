@@ -27,3 +27,13 @@
 
 ## HR Core Enterprise — Enterprise hardening
 This build adds company-scoped authentication, server-side authorization, employee master data, organization/position/vacancy flows, dynamic transaction definitions and workflows, payroll generation/approval/lock/export, reports, users/roles, notifications and audit APIs. The schema manager is additive and does not drop existing tables or data. Default bootstrap: company `GLOBAL`, user `admin`, password `1234`; change the password/disable bootstrap before production.
+
+
+## 2026-09 Performance / Transaction UX hardening
+- Worker schema bootstrap is cached per Worker isolate instead of running PRAGMA/index/seed work on every request.
+- Transaction definitions support company + department grouping, dynamic fields, role-based workflow steps and optional conditions.
+- Transaction list is paginated/limited and searchable server-side.
+- Transaction detail includes values, workflow and history.
+- Organization view renders a hierarchical visual tree from department parent relationships.
+- Frontend GET requests use short-lived cache/in-flight de-duplication; navigation no longer refetches identical data repeatedly.
+- Added migration 0003 for transaction administration indexes/department linkage.
