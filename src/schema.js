@@ -132,12 +132,18 @@ async function seed(db){
   const perms=await db.prepare(`SELECT id FROM permissions WHERE active=1`).all();
   for(const p of (perms.results||[])) await db.prepare(`INSERT OR IGNORE INTO role_permissions(role_id,permission_id) VALUES(?,?)`).bind(admin.id,p.id).run();
   const defaultPass='pbkdf2$100000$YWRtaW4tc2FsdC0yMDI2$38FPEssFOEsudeS7rQL4gfovCum_Qzrhf7H6WKLwCe0';
-  // The seed hash is replaced at first bootstrap if absent; password verification also accepts SHA-256 legacy only for this seed account.
-  await db.prepare(`INSERT OR IGNORE INTO users(id,username,password_hash,display_name,role_id,company_id,active,must_change_password) VALUES(1,'admin',?,'مدير النظام',?,1,1,1)`).bind(defaultPass,admin.id).run();
+  // Bootstrap is deterministic: on a clean database create admin; if the seed account exists
+  // but its bootstrap hash differs, repair only this dedicated bootstrap account.
+  const existingAdmin=await db.prepare(`SELECT id,password_hash,role_id FROM users WHERE username='admin'`).first();
+  if(!existingAdmin){
+    await db.prepare(`INSERT INTO users(id,username,password_hash,display_name,role_id,company_id,active,must_change_password) VALUES(1,'admin',?,'مدير النظام',?,1,1,1)`).bind(defaultPass,admin.id).run();
+  }else if(existingAdmin.password_hash!==defaultPass || existingAdmin.role_id!==admin.id){
+    await db.prepare(`UPDATE users SET password_hash=?,role_id=?,active=1,must_change_password=1,updated_at=CURRENT_TIMESTAMP WHERE id=? AND username='admin'`).bind(defaultPass,admin.id,existingAdmin.id).run();
+  }
   const components=[['basic','الراتب الأساسي','earning'],['housing','بدل السكن','earning'],['transport','بدل النقل','earning'],['other','بدلات أخرى','earning'],['gosi','التأمينات الاجتماعية','deduction']];
   for(const c of components) await db.prepare(`INSERT OR IGNORE INTO payroll_components(code,name_ar,type) VALUES(?,?,?)`).bind(...c).run();
-  await db.prepare(`INSERT OR IGNORE INTO system_settings(setting_key,setting_value) VALUES('schema_version','1')`).run();
-  await db.prepare(`INSERT OR IGNORE INTO schema_migrations(version,name) VALUES(1,'canonical-enterprise-schema')`).run();
+  await db.prepare(`INSERT OR IGNORE INTO system_settings(setting_key,setting_value) VALUES('schema_version','2')`).run();
+  await db.prepare(`INSERT OR IGNORE INTO schema_migrations(version,name) VALUES(2,'bootstrap-admin-repair')`).run();
 }
 
 let bootPromise;
